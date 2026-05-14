@@ -1,0 +1,12 @@
+{
+  "name": "ux-metrics-skills",
+  "description": "UX metrics skills — measurement planning, metric diagnosis, stakeholder communication, and framework foundations.",
+  "version": "1.0.1",
+  "author": {
+    "name": "Azar NEMANLI"
+  },
+  "homepage": "https://github.com/nemanli/ux-metrics-skills",
+  "repository": "https://github.com/nemanli/ux-metrics-skills",
+  "license": "MIT",
+  "skills": "./skills"
+}

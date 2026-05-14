@@ -1,0 +1,19 @@
+{
+  "name": "ux-metrics-skills",
+  "owner": {
+    "name": "Azar NEMANLI"
+  },
+  "metadata": {
+    "description": "UX metrics skills — measurement planning, metric diagnosis, stakeholder communication, and framework foundations."
+  },
+  "plugins": [
+    {
+      "name": "ux-metrics-skills",
+      "source": {
+        "source": "github",
+        "repo": "nemanli/ux-metrics-skills"
+      },
+      "description": "Eight skills that mentor designers through the full UX measurement cycle — pick, plan, instrument, diagnose, review, present."
+    }
+  ]
+}
