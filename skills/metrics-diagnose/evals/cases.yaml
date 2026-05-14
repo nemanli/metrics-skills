@@ -1,0 +1,74 @@
+# metrics-diagnose — eval cases
+# Schema: docs/evals-schema.yaml
+# Cases: 3 (1 golden-path + 2 edge-case)
+
+cases:
+  - id: diagnose-golden-1
+    skill_under_test: metrics-diagnose
+    prompt: |
+      Task Success Rate dropped from 74% to 61% after our latest release.
+      Sample size is 1,200 users in each period. Why might this be happening
+      and what should I check first?
+    expected_behavior:
+      - auto-triggers metrics-diagnose (not metrics-ux, not metrics-help)
+      - detects specific mode (data + goal clear)
+      - runs a proper signal-vs-noise test (two-proportion z-test, with stated
+        p-value and confidence interval)
+      - states whether the change is statistically significant
+      - generates ranked hypotheses tied to root-cause-patterns.md
+        (UI change, instruction clarity, edge case, etc.)
+      - proposes a prioritized action plan (what to check first, with method)
+      - links to hypothesis-tests.md for the test selection
+    anti_pattern:
+      - jumps to a single hypothesis without ranking
+      - recommends "run an A/B test" without checking simpler analytics first
+      - reports "13-point drop" without statistical context (CI, effect size)
+      - fabricates segment-level numbers the user did not provide
+      - confuses correlation with causation in the hypothesis ranking
+    notes: |
+      Middle designer, specific mode, sufficient data. Tests the 7-step
+      Process and the deep stats in Step 4. Phase 8 golden-path #2.
+
+  - id: diagnose-edge-mode-conflict
+    skill_under_test: metrics-diagnose
+    prompt: |
+      Task Success Rate is 58% on our new feature. The feature shipped two
+      weeks ago. Is this good or bad?
+    expected_behavior:
+      - recognizes there is no baseline (feature is new) — Red Flag
+      - explicitly states the mode conflict (data exists, but no comparison point)
+      - either (a) asks for a target/benchmark, (b) suggests a comparable
+        feature's historical Task Success Rate, or (c) reframes as a baseline-
+        setting exercise rather than a diagnosis
+      - does not invent an "industry benchmark" number
+      - links to root-cause-patterns.md or measurement-philosophy.md
+    anti_pattern:
+      - declares 58% "low" or "high" without baseline justification
+      - fabricates a benchmark ("industry standard is 70%")
+      - runs a statistical test against an imaginary control
+      - silently routes to metrics-ux without explaining why
+    notes: |
+      Edge case — mode conflict. Tests Red Flag #1 (no baseline) from
+      metrics-diagnose/SKILL.md. Phase 8 edge-case #6.
+
+  - id: diagnose-edge-out-of-scope
+    skill_under_test: metrics-help
+    prompt: |
+      Our MRR dropped 8% last month. How do I figure out why?
+    expected_behavior:
+      - auto-triggers metrics-help OR metrics-diagnose with explicit scope warning
+      - states clearly that revenue/MRR diagnosis is out of v1 scope
+        (metrics-product deferred to v2)
+      - offers the closest covered alternative (UX-side retention, churn,
+        cohort analysis from ux-retention.md)
+      - does not pretend to handle revenue analysis
+      - does not fabricate a churn/MRR diagnostic framework
+    anti_pattern:
+      - dives into MRR root-cause analysis using made-up product frameworks
+      - silently treats MRR as if it were a UX metric
+      - recommends specific business actions (pricing changes, sales tactics)
+      - claims metrics-product exists or is about to ship
+    notes: |
+      Edge case — out of scope. Tests router's out-of-scope handling
+      (metrics-help/SKILL.md Step 2) and metrics-diagnose's scope discipline.
+      Phase 8 edge-case #3.

@@ -1,0 +1,61 @@
+# Evals schema — structure for skill test cases
+#
+# This file documents the shape of `cases.yaml` files that live inside each
+# Profile A skill's `evals/` directory.
+#
+# Skills that get evals: metrics-ux, metrics-diagnose, metrics-present.
+# Skills excluded: metrics-help (router), metrics-basics (foundational).
+#
+# Each case tests one prompt against one skill. A case passes when the skill's
+# response matches `expected_behavior` and avoids every item in `anti_pattern`.
+
+# ---------------------------------------------------------------------------
+# Field reference
+# ---------------------------------------------------------------------------
+#
+# id                  string   Stable identifier. Format: <skill>-<type>-<n>.
+#                              Type is "golden" or "edge". Example: ux-golden-1.
+#
+# prompt              string   The exact user message sent to the skill.
+#                              Multiline allowed (use YAML | for block scalar).
+#
+# expected_behavior   list     What the skill MUST do. Each item is one
+#                              observable behavior (asks anchor X, recommends
+#                              metric Y, links to reference Z, etc.).
+#
+# anti_pattern        list     What the skill MUST NOT do. Each item is one
+#                              failure mode (fabricates data, skips
+#                              questionnaire, recommends vanity metric, etc.).
+#
+# skill_under_test    string   The skill being evaluated. One of:
+#                              metrics-ux, metrics-diagnose, metrics-present.
+#
+# notes               string   Optional. Why this case exists, edge case it
+#                              targets, or context for the reviewer.
+
+# ---------------------------------------------------------------------------
+# Example case
+# ---------------------------------------------------------------------------
+
+cases:
+  - id: ux-golden-1
+    skill_under_test: metrics-ux
+    prompt: |
+      I redesigned the onboarding flow for our mobile app last sprint.
+      What should I measure?
+    expected_behavior:
+      - detects vague mode (situation present, goal/data missing)
+      - asks for missing context anchors (STAGE, AUDIENCE, DATA — SCOPE is present)
+      - asks at most one numbered question covering the 3 missing anchors
+      - does not recommend metrics before context is clarified
+      - links to metrics-basics/references/context-questions.md when asking
+    anti_pattern:
+      - skips questionnaire and dumps a generic HEART metric list
+      - asks more than 4 questions in one turn
+      - re-asks SCOPE (already provided as "onboarding flow, mobile app")
+      - recommends vanity metrics (page views, session count) without justification
+      - fabricates a baseline number the user did not provide
+    notes: |
+      Junior designer, vague mode. Tests that the skill respects the
+      adaptive-mode rules and the present-vs-missing
+      anchor logic from context-questions.md.

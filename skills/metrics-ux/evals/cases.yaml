@@ -1,0 +1,108 @@
+# metrics-ux — eval cases
+# Schema: docs/evals-schema.yaml
+# Cases: 5 (2 golden-path + 3 edge-case)
+
+cases:
+  - id: ux-golden-1
+    skill_under_test: metrics-ux
+    prompt: |
+      I redesigned the onboarding flow for our mobile app last sprint.
+      What should I measure?
+    expected_behavior:
+      - auto-triggers metrics-ux (not metrics-help, not metrics-basics)
+      - detects vague mode (situation present, goal/data missing)
+      - asks for missing context anchors (STAGE, AUDIENCE, DATA — SCOPE is present)
+      - asks at most one numbered question covering the 3 missing anchors
+      - does not recommend metrics before context is clarified
+      - references context-questions.md or its 4 anchors by name
+    anti_pattern:
+      - skips questionnaire and dumps a generic HEART metric list
+      - asks more than 4 questions in one turn
+      - re-asks SCOPE (already provided as "onboarding flow, mobile app")
+      - recommends vanity metrics (page views, session count) without justification
+      - fabricates a baseline number the user did not provide
+      - routes to metrics-help (intent is clear)
+    notes: |
+      Junior designer, vague mode. Tests adaptive-mode rules
+      and present-vs-missing anchor logic.
+
+  - id: ux-golden-2
+    skill_under_test: metrics-ux
+    prompt: |
+      We're launching a new AI feature next quarter. The CPO wants me to
+      defend the metric choice in the planning review. How do I pick metrics
+      I can defend later?
+    expected_behavior:
+      - auto-triggers metrics-ux (primary), may also recommend metrics-present as next step
+      - detects specific mode (situation + goal both clear)
+      - skips questionnaire — context is sufficient
+      - recommends 2–3 metrics from HEART, each tied to a Goal–Signal
+      - mentions counter-metric or guardrail concept
+      - suggests metrics-present for the actual defence/communication step
+    anti_pattern:
+      - re-asks SCOPE or AUDIENCE (already provided)
+      - recommends a single metric without counter-metric
+      - fabricates benchmarks (e.g. "industry average is 73%") without source
+      - jumps straight into metrics-present output (slide, email) — that is the next skill
+    notes: |
+      Senior designer, specific mode, multi-skill setup (ux first, then present).
+      Tests Routing Step 3 sequence logic and counter-metric awareness.
+
+  - id: ux-edge-insufficient-data
+    skill_under_test: metrics-ux
+    prompt: |
+      I designed a new dashboard for internal users. We have no analytics
+      set up yet. Can I still measure how well it works?
+    expected_behavior:
+      - acknowledges data anchor is empty (DATA missing)
+      - proposes interim qualitative methods (5-user usability test, task success
+        rate observed manually, structured interviews)
+      - recommends instrumenting analytics in parallel for later quantitative tracking
+      - does not refuse the request
+      - links to ux-task-success.md or hypothesis-tests.md (5-user rule, NN/g)
+    anti_pattern:
+      - refuses with "you need analytics first, come back later"
+      - recommends quantitative metrics (DAU, retention) the user cannot collect
+      - fabricates a tool recommendation (Mixpanel, Amplitude) without the user asking
+    notes: |
+      Edge case — insufficient data. Tests that the skill adapts to constraints
+      rather than gatekeeping. Phase 8 edge-case #1.
+
+  - id: ux-edge-wrong-metric
+    skill_under_test: metrics-ux
+    prompt: |
+      I want to increase page views on the marketing site. What's the
+      right metric to track?
+    expected_behavior:
+      - flags page views as a vanity metric (no clear user-value link)
+      - asks what the underlying goal is (signups, content engagement, conversion)
+      - proposes an actionable alternative (scroll depth + signup rate, or
+        engaged sessions, or conversion rate per source)
+      - references measurement-philosophy.md (vanity vs actionable)
+    anti_pattern:
+      - answers the literal question — "track page views via GA4" — without challenge
+      - recommends bounce rate as the only fix (still surface-level)
+      - lectures abstractly about vanity without proposing concrete alternatives
+    notes: |
+      Edge case — wrong metric request. Tests the "redirect, don't comply"
+      pattern from measurement-philosophy.md. Phase 8 edge-case #2.
+
+  - id: ux-edge-ambiguous
+    skill_under_test: metrics-help
+    prompt: |
+      metrics
+    expected_behavior:
+      - auto-triggers metrics-help (not metrics-ux, not metrics-basics)
+      - asks the 4-option scoping question from metrics-help/SKILL.md Step 1
+      - does not guess what the user means
+      - does not recommend any specific metric
+    anti_pattern:
+      - jumps into a HEART explainer
+      - lists all 5 ux-* references unprompted
+      - asks more than 1 follow-up question
+      - calls another skill directly (forbidden by cross-skill rule #3)
+    notes: |
+      Edge case — ambiguous one-word prompt. Tests router fallback logic
+      (Phase 6 architecture). Logged in metrics-ux/evals/ because the
+      ambiguous prompt is most likely intended for ux work, but the
+      correct routing target is metrics-help. Phase 8 edge-case #5.

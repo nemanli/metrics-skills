@@ -1,0 +1,65 @@
+# metrics-present — eval cases
+# Schema: docs/evals-schema.yaml
+# Cases: 2 (1 golden-path + 1 edge-case)
+
+cases:
+  - id: present-golden-1
+    skill_under_test: metrics-present
+    prompt: |
+      Quarterly review is next week. We redesigned the checkout flow last
+      quarter. Task completion went from 62% to 78% (n=2,400 per period,
+      p<0.01). Drop-off after checkout went up slightly (3.1% → 3.8%).
+      Help me build the design impact story for the leadership team.
+    expected_behavior:
+      - auto-triggers metrics-present (not metrics-ux, not metrics-diagnose)
+      - detects specific mode (results + audience clear)
+      - picks a format appropriate for "leadership team" (slide or short memo,
+        not a retro deck)
+      - leads with the headline outcome, not the design process
+      - includes the counter-metric (drop-off increase) honestly, not buried
+      - translates "task completion" into business language
+        (revenue impact, support cost, conversion lift)
+      - links to templates.md for the format and business-language.md for
+        the translation
+      - does not request more data — the user provided everything needed
+    anti_pattern:
+      - buries the lead in design process narrative
+      - omits the counter-metric (drop-off rise)
+      - uses design jargon (affordance, mental model, IA) without translation
+      - fabricates a dollar value not derivable from the provided numbers
+      - recommends running more tests before presenting (out of scope —
+        results are validated)
+      - claims a single metric proves design's impact (single-metric victory)
+    notes: |
+      Lead designer, specific mode, sufficient data, presentation-ready.
+      Tests the 6-step Process, format-pick table, and counter-metric
+      framing. Phase 8 golden-path #4.
+
+  - id: present-edge-stakeholder-pushback
+    skill_under_test: metrics-present
+    prompt: |
+      The CPO insists NPS is our north-star metric. I disagree — for our
+      product, completion rate matters more. How do I push back without
+      losing the room?
+    expected_behavior:
+      - auto-triggers metrics-present (this is a framing/communication problem)
+      - reframes the request — this is about defending a metric choice with
+        data, not about the conflict itself
+      - proposes a data-based argument structure (show NPS limitations for
+        this product type, link completion to business outcomes the CPO
+        cares about, propose NPS as guardrail rather than primary)
+      - acknowledges the political dimension without taking sides
+      - links to business-language.md for the translation pattern
+        (UX language → business language the CPO will accept)
+      - does not pretend to resolve interpersonal conflict
+    anti_pattern:
+      - takes a side ("you're right, NPS is bad")
+      - lectures abstractly about NPS limitations without tying to the product
+      - recommends going around or above the CPO
+      - fabricates research showing NPS is wrong for the user's product type
+      - silently routes to metrics-ux (the user is past metric selection —
+        they need framing, not new metrics)
+    notes: |
+      Edge case — stakeholder pushback. Tests that the skill stays in scope
+      (framing/communication) and refuses to handle the conflict itself.
+      Phase 8 edge-case #4.

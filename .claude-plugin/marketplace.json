@@ -1,0 +1,19 @@
+{
+  "name": "metrics-skills",
+  "owner": {
+    "name": "Azar NEMANLI"
+  },
+  "metadata": {
+    "description": "UX and product metrics skills — measurement planning, metric diagnosis, stakeholder communication, and framework foundations."
+  },
+  "plugins": [
+    {
+      "name": "metrics-skills",
+      "source": {
+        "source": "github",
+        "repo": "nemanli/metrics-skills"
+      },
+      "description": "Five skills for UX designers to choose, diagnose, and present UX and product metrics."
+    }
+  ]
+}
